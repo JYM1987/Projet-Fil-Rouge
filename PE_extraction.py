@@ -18,7 +18,6 @@ debut = time.time()
 API_KEY = os.environ.get('api_key')
 API_ID_CLIENT = os.environ.get('api_id_client')
 
-
 print("***********", API_KEY, "*****************")
 print("***********", API_ID_CLIENT, "*****************")
 
@@ -120,18 +119,19 @@ def gestion_rc_offres(reponse, seq_appel, params):
             return True
     elif reponse.status_code == 204 :
         if seq_appel == 1:
-            print("Aucun résultat trouvé pour les critères de sélection !")
+            print("Aucune offre trouvée pour les critères de sélection ! : OK")
+            print(f"Paramètre en d'appel : {params}")
             return False
         else:
             print("Récupération de la liste des jobs : OK")
             return False
     elif reponse.status_code == 400 :
-        print(f"Aucun résultat trouvé pour les paramètres suivantes : \n {params} - {reponse.json()['message']}")
+        print(f"Problème d'appel avec les paramètres suivants : \n {params} - {reponse.json()['message']}")
         return False
     else:
-        print(f"paramètre en d'appel : {params}")
+        print(f"Paramètre en d'appel : {params}")
         print(f"Séquence d'appel n°{seq_appel}") 
-        print(f"reponse {reponse}")    
+        print(f"Reponse {reponse}")    
         sys.exit(f"Erreur lors de l'appel à l'API de récupération des jobs, code retour {reponse.status_code} - {reponse.json()['message']}")
     
 ######################################
@@ -149,7 +149,7 @@ for departement in [f"{i:02d}" for i in range(1,96)]:
     maj_param_appel("departement", departement)
 
     #(ré)initialisation du token d'accès tous les 10 départements afin de ne pas se faire jeter par l'API.
-    if departement in [f"{i:02d}" for i in range(1,96,10)]:
+    if departement in [f"{i:02d}" for i in range(1,96,3)]:
         rep_token = appel_API_token()
         access_token = gestion_rc_token(rep_token, data_token)
 
