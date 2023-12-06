@@ -1,7 +1,6 @@
 ###########################################################################################
 ###   Transformation des données du site de pôle emploi + insert dans une base No SQL   ###
 ###########################################################################################
-from pprint import pprint
 import pandas as pd
 import numpy as np
 import json
@@ -21,7 +20,7 @@ debut = time.time()
 
 # Charger le contenu du JSON en tant que liste d'objets
 with open("dataPE.json", "r") as file:
-    dataPE_list = json.loads(file.read())
+    dataPE = json.loads(file.read())
 
 #---------------------------------------------------
 # Fonctions du programme
@@ -51,10 +50,9 @@ def calcul_multiplicateur(index:int, periodicite:str, nb_mois=12):
 comp = []
 
 data_aplat = []
-for job in dataPE_list:
+for job in dataPE:
     data_doc = {
     "accessibleTH": job.get("accessibleTH", ""),
-    "alternance": job.get("alternance", ""),
     "appellationlibelle": job.get("appellationlibelle", ""),
     "codeNAF": job.get("codeNAF", ""),
     "competences_nb" : len(job.get("competences", "")),
@@ -104,18 +102,22 @@ for job in dataPE_list:
 
     if job.get("langues") != None :
         for i, langue in enumerate(job.get("langues")):
-                dict1= {f"langues{i+1}_libelle" : f"{comp.get('libelle', '')}"}
-                dict2 = {f"langues{i+1}_exigence" : f"{comp.get('exigence', '')}"}
-                data_doc.update(dict1)
-                data_doc.update(dict2)
+                if langue != None:
+                    dict1= {f"langues{i+1}_libelle" : f"{langue.get('libelle','-')}"}
+                    dict2 = {f"langues{i+1}_exigence" : f"{langue.get('exigence', '-')}"}
+                    data_doc.update(dict1)
+                    data_doc.update(dict2)
 
     if job.get("permis") != None :
         for i, type_permis in enumerate(job.get("permis")):
-                dict1= {f"permis{i+1}_libelle" : f"{comp.get('libelle', '')}"}
-                dict2 = {f"permis{i+1}_exigence" : f"{comp.get('exigence', '')}"}
+                dict1= {f"permis{i+1}_libelle" : f"{type_permis.get('libelle', '')}"}
+                dict2 = {f"permis{i+1}_exigence" : f"{type_permis.get('exigence', '')}"}
                 data_doc.update(dict1)
                 data_doc.update(dict2)
-
+    else:
+        for i in range(1,3):
+            data_doc.update({f"permis{i}_libelle" : ""})
+            data_doc.update({f"permis{i}_exigence" : ""})
 
     if job.get("competences") != None:
         for i, comp in enumerate(job.get("competences")):
@@ -129,22 +131,24 @@ for job in dataPE_list:
 
     if job.get("qualitesProfessionnelles") != None:
         for i, qualite in enumerate(job.get("qualitesProfessionnelles")):
-                dict1= {f"qualitesProfessionnelles{i+1}_libelle" : f"{comp.get('libelle', '')}"}
-                dict2 = {f"qualitesProfessionnelles{i+1}_description" : f"{comp.get('description', '')}"}
+                dict1= {f"qualitesProfessionnelles{i+1}_libelle" : f"{qualite.get('libelle', '')}"}
+                dict2 = {f"qualitesProfessionnelles{i+1}_description" : f"{qualite.get('description', '')}"}
                 data_doc.update(dict1)
                 data_doc.update(dict2)
 
     data_aplat.append(data_doc)
 
 df = pd.DataFrame(data_aplat)
-df= df[sorted(df.columns)]
-df.to_csv("df.csv", index=False)
+#remplacement des Nan du fait de la mise à plat des données.
 
+df= df[sorted(df.columns)]
+"""df.to_csv("df.csv",sep='|', index=False)
+"""
 #---------------------------------------------------
 # Transformation des données
 #---------------------------------------------------
 
-#transformation des Nan en "" 
+#transformation des Nan en "" (issu de la mise à plat des données)
 df = df.fillna("")
 
 # Suppression des doublons
@@ -166,7 +170,6 @@ for x, ligne in enumerate(df["experienceLibelle"]):
         df.at[x, "experience_nb_annees"] = re.search(r"\d+", ligne).group()
     #si la ligne contient "mois" et qu'il existe un nombre dans le libellé
     elif " mois" in ligne and re.search(r"\d+", ligne):
-        #df.tail(5).to_csv("df_avant.csv", index=False)
         df.at[x, "experience_nb_annees"] = round(int(re.search(r"\d+", ligne).group())/12, 2)
     #Sinon, si le libellé est simplement formaté avec les 2 mots suivants, on fixera arbitrairement l'expérience requise à 3ans.
     elif "Expérience souhaitée" in ligne or "Expérience exigée" in ligne :
@@ -174,6 +177,8 @@ for x, ligne in enumerate(df["experienceLibelle"]):
     #Sinon, on sera dans le cas "Débutant accepté"
     else:
         df.at[x, "experience_nb_annees"] = 0
+#homogénéisation des données
+df["experience_nb_annees"] = df["experience_nb_annees"].astype('float')
 
 #extraction du numéro de département et de la ville de la zone lieuTravail_libellé 
 #-- extraction et formatage du département sur 2c
@@ -196,35 +201,34 @@ for x, ligne in enumerate(df["salaire_libelle"]):
         if nb_resultats == 2:
             #il n'y a qu'un salaire que l'on va calculer en annuel en fonction de la périodicité affichée et du temps de travail
             multiplicateur = calcul_multiplicateur(x, l_resultats[0])
-            df.loc[x,"salaire_min"] = str(round(float(l_resultats[1]) * multiplicateur))
+            df.loc[x,"salaire_min"] = np.trunc(float(l_resultats[1]) * multiplicateur)
             df.loc[x,"salaire_max"] = df.loc[x,"salaire_min"] 
         elif nb_resultats == 3:
             #il n'y a que le salaire minimum et maximum que l'on va calculer en annuel en fonction de la périodicité affichée et du temps de travail
             multiplicateur = calcul_multiplicateur(x, l_resultats[0])
-            df.loc[x,"salaire_min"] = str(round(float(l_resultats[1]) * multiplicateur))
-            df.loc[x,"salaire_max"] = str(round(float(l_resultats[2]) * multiplicateur))
+            df.loc[x,"salaire_min"] = np.trunc(float(l_resultats[1]) * multiplicateur)
+            df.loc[x,"salaire_max"] = np.trunc(float(l_resultats[2]) * multiplicateur)
         elif nb_resultats == 4:
             #il n'y a que le salaire minimum et le nombre de mois
             multiplicateur = calcul_multiplicateur(x, l_resultats[0], l_resultats[3])
-            df.loc[x,"salaire_min"] = str(round(float(l_resultats[1]) * multiplicateur))
+            df.loc[x,"salaire_min"] = np.trunc(float(l_resultats[1]) * multiplicateur)
             df.loc[x,"salaire_max"] = df.loc[x,"salaire_min"] 
         elif nb_resultats == 5:
             #il y a le salaire minimum, maximum et le nombre de mois
             multiplicateur = calcul_multiplicateur(x, l_resultats[0], l_resultats[4])
-            df.loc[x,"salaire_min"] = str(round(float(l_resultats[1]) * multiplicateur))
-            df.loc[x,"salaire_max"] = str(round(float(l_resultats[2]) * multiplicateur))
+            df.loc[x,"salaire_min"] = np.trunc(float(l_resultats[1]) * multiplicateur)
+            df.loc[x,"salaire_max"] = np.trunc(float(l_resultats[2]) * multiplicateur)
         else:
-            df.loc[x,"salaire_min"] = ""
-            df.loc[x,"salaire_max"] = ""
-
-#calcul du salaire moyen
-df["salaire_min"] = pd.to_numeric(df["salaire_min"], errors='coerce')
-df["salaire_max"] = pd.to_numeric(df["salaire_max"], errors='coerce')
+            df.loc[x,"salaire_min"] = 0
+            df.loc[x,"salaire_max"] = 0
 
 # Ajoutez ensuite la colonne "salaire_moyen"
-df["salaire_moyen"] = round((df["salaire_min"] + df["salaire_max"]) / 2)
+df["salaire_moyen"] = np.trunc((df["salaire_min"] + df["salaire_max"]) / 2)
 #exclusion des salaires moyens supérieurs à 150K€ à l'année : dus à des erreurs de saisie.
-df["salaire_moyen"] = df["salaire_moyen"].apply(lambda x : "" if x > 150000 else x)
+df["salaire_moyen"] = df["salaire_moyen"].apply(lambda x : 0 if x > 150000 else x)
+#conversion en int de tous les salaires
+df[["salaire_min", "salaire_max", "salaire_moyen"]] = df[["salaire_min", "salaire_max", "salaire_moyen"]].astype("int")
+
 
 #Rajout de la division du code 
 #-- on récupère la base de données NAF du réseau
@@ -239,29 +243,26 @@ for x,ligne in enumerate(df["codeNAF"]):
         df.loc[x,["codeNAF_division_libelle"]] = str(df_naf.loc[int(ligne[:2]), "Libelle_division_NAF"])
 
 #df contient toutes les données de Pôle Emploi, on va aussi créer un DF spécialement pour faire un Dashboard sous Dash
-col_to_drop=   ["alternance",				   "lieuTravail_commune",	    "qualitesProfessionnelles1_description",   "typeContratLibelle",    
-                "dateActualisation",           "lieuTravail_latitude",     "qualitesProfessionnelles1_libelle",         "dureeTravailLibelle",
-                "dateCreation",                "lieuTravail_libelle",      "qualitesProfessionnelles2_description",
-                "deplacementLibelle",          "lieuTravail_longitude",    "qualitesProfessionnelles2_libelle",
-                "description",                 "natureContrat",            "qualitesProfessionnelles3_description",
-                "dureeTravailLibelleConverti", "origineOffre",             "qualitesProfessionnelles3_libelle",
-                "entreprise_description",      "outilsBureautiques",       "salaire_commentaire",
-                "entreprise_logo",             "permis1_exigence",         "salaire_complement1",
-                "entreprise_url",              "permis1_libelle",          "salaire_complement2",
-                "experienceLibelle",           "permis2_exigence",         "salaire_libelle",
-                "id",                          "permis2_libelle",          "codeNAF",
-                "intitule",                    "permis_nb",                "secteurActiviteLibelle"]                
 
 #les Dataframes finaux :
-df= df[sorted(df.columns)]         
-df_dash = df.drop(col_to_drop, axis=1)
+df= df[sorted(df.columns)]     
+
+df_dash = df[[  "codeNAF_division_libelle",   	"entreprise_nom",			"lieuTravail_commune",			"romeLibelle",
+                "dateCreation",                 "experienceExige",          "lieuTravail_longitude",		"salaire_min",
+                "description",                  "experienceLibelle",        "lieuTravail_nom_ville",    	"salaire_max",					  
+                "dureeTravailLibelle",          "id",                       "lieuTravail_codepostal",		"salaire_moyen",		 				   
+                "dureeTravailLibelleConverti",  "intitule",                 "natureContrat",    			"secteurActiviteLibelle",
+                "entreprise_adaptee",           "lieuTravail_latitude",     "qualificationLibelle",			"typeContrat",				                
+                "experience_nb_annees",			"lieuTravail_libelle",		"qualificationCode"]]        
+df_dash= df_dash[sorted(df_dash.columns)]  
+
 
 #extraction en CSV
-df.to_csv("df2.csv", index=False)
+"""df.to_csv("df2.csv",sep='|', index=False)
 #extraction en json
 with open("DfPE.json", "w") as fichier:
-    json.dump(df.to_dict(orient='records'), fichier, indent=4)
+    json.dump(df_dash.to_dict(orient='records'), fichier, indent=4)"""
 
-print(f"\nTransformation fin - nombre d'enregistrements : {len(df)}")
+print(f"\nTransformation - nombre d'enregistrements : {len(df)}")
 print(f"Temps d'exécution {round((time.time()-debut)/60 ,2)} minutes")
 
