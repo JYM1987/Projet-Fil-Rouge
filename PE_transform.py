@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 import json
 import re
-#from PE_extraction import dataPE
+from PE_extraction import dataPE
 import time
 
 
@@ -19,8 +19,8 @@ debut = time.time()
 #---------------------------------------------------
 
 # Charger le contenu du JSON en tant que liste d'objets
-with open("dataPE.json", "r") as file:
-    dataPE = json.loads(file.read())
+"""with open("dataPE.json", "r") as file:
+    dataPE = json.loads(file.read())"""
 
 #---------------------------------------------------
 # Fonctions du programme
@@ -94,12 +94,12 @@ for job in dataPE:
     "salaire_commentaire": job.get("salaire").get("commentaire", ""),
     "salaire_complement1": job.get("salaire").get("complement1", ""),
     "salaire_complement2": job.get("salaire").get("complement2", ""),
-    "codeNAF_division": job.get("secteurActivite", ""),
+    "codeNAF_division": job.get("secteurActivite", 0),
     "secteurActiviteLibelle": job.get("secteurActiviteLibelle", ""),
     "typeContrat": job.get("typeContrat", ""),
     "typeContratLibelle": job.get("typeContratLibelle", "")
     }
-
+    
     if job.get("langues") != None :
         for i, langue in enumerate(job.get("langues")):
                 if langue != None:
@@ -159,6 +159,7 @@ df["accessibleTH"] = df["accessibleTH"].replace("", df["accessibleTH"].mode()[0]
 
 #extraction de la durée horaire du libellé et transformation au format numérique 38H30 ==> 38.5
 df["dureeTravail"] = df["dureeTravailLibelle"].apply(lambda x : x[:2]+"."+ (str(round(int(x.replace(" ", "")[3:5])/60*100 )) if x.replace(" ", "")[3:4].isnumeric() else "00"))
+df["dureeTravail"] = df["dureeTravail"].astype("float")
 
 #Reset des index car les transfo suivantes produisent des bizarreries...
 df.reset_index(drop=True, inplace=True)
@@ -177,8 +178,6 @@ for x, ligne in enumerate(df["experienceLibelle"]):
     #Sinon, on sera dans le cas "Débutant accepté"
     else:
         df.at[x, "experience_nb_annees"] = 0
-#homogénéisation des données
-df["experience_nb_annees"] = df["experience_nb_annees"].astype('float')
 
 #extraction du numéro de département et de la ville de la zone lieuTravail_libellé 
 #-- extraction et formatage du département sur 2c
@@ -226,8 +225,8 @@ for x, ligne in enumerate(df["salaire_libelle"]):
 df["salaire_moyen"] = np.trunc((df["salaire_min"] + df["salaire_max"]) / 2)
 #exclusion des salaires moyens supérieurs à 150K€ à l'année : dus à des erreurs de saisie.
 df["salaire_moyen"] = df["salaire_moyen"].apply(lambda x : 0 if x > 150000 else x)
-#conversion en int de tous les salaires
-df[["salaire_min", "salaire_max", "salaire_moyen"]] = df[["salaire_min", "salaire_max", "salaire_moyen"]].astype("int")
+
+
 
 
 #Rajout de la division du code 
@@ -242,8 +241,12 @@ for x,ligne in enumerate(df["codeNAF"]):
     if ligne != "" and ligne != "":
         df.loc[x,["codeNAF_division_libelle"]] = str(df_naf.loc[int(ligne[:2]), "Libelle_division_NAF"])
 
-#df contient toutes les données de Pôle Emploi, on va aussi créer un DF spécialement pour faire un Dashboard sous Dash
+#homogénéisation des types de données
+df[["experience_nb_annees", "dureeTravail"]] = df[["experience_nb_annees", "dureeTravail"]].astype('float')
+df[["deplacementCode", "origineOffre", "qualificationCode"]] = df[["deplacementCode", "origineOffre", "qualificationCode"]].astype('int')
+df[["salaire_min", "salaire_max", "salaire_moyen"]] = df[["salaire_min", "salaire_max", "salaire_moyen"]].astype("int")
 
+#df contient toutes les données de Pôle Emploi, on va aussi créer un DF spécialement pour faire un Dashboard sous Dash
 #les Dataframes finaux :
 df= df[sorted(df.columns)]     
 
@@ -262,6 +265,7 @@ df_dash= df_dash[sorted(df_dash.columns)]
 #extraction en json
 with open("DfPE.json", "w") as fichier:
     json.dump(df_dash.to_dict(orient='records'), fichier, indent=4)"""
+
 
 print(f"\nTransformation - nombre d'enregistrements : {len(df)}")
 print(f"Temps d'exécution {round((time.time()-debut)/60 ,2)} minutes")

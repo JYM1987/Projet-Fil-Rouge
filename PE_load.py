@@ -3,7 +3,7 @@
 #############################################################
 from pprint import pprint
 from pymongo import MongoClient
-from PE_transform import df, df_dash
+from PE_ml import df, df_dash
 import time
 
 # Enregistrez le temps de début
@@ -20,7 +20,7 @@ client = MongoClient(host="127.0.0.1", port = 27017)
 DB = client["DB_job"]
 #Création et initialisation de la collection "PE_all" qui regroupe toutes les données de Pôle Emploi 
 # et "Dash" qui regroupe toutes les données utiles pour faire un Dashboard
-c_PE = DB["PE_all"]
+c_PE = DB["PE"]
 c_dash = DB["Dash"]
 # RAZ des collections
 c_PE.drop()
@@ -30,6 +30,8 @@ c_dash.drop()
 # insertion des données 
 #---------------------------------------------------
 c_PE.insert_many(df.to_dict(orient="records"))
+
+df_dash["salaire_moyen_ML"] = df["salaire_moyen_ML"]
 c_dash.insert_many(df_dash.to_dict(orient="records"))
 
 print(f"\nLoad - nombre d'enregistrements : {c_PE.count_documents({})}")
