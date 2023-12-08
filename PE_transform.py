@@ -49,6 +49,7 @@ def calcul_multiplicateur(index:int, periodicite:str, nb_mois=12):
 #---------------------------------------------------
 comp = []
 
+#Extraction des données du Json
 data_aplat = []
 for job in dataPE:
     data_doc = {
@@ -139,9 +140,9 @@ for job in dataPE:
     data_aplat.append(data_doc)
 
 df = pd.DataFrame(data_aplat)
-#remplacement des Nan du fait de la mise à plat des données.
-
 df= df[sorted(df.columns)]
+
+#recopie des données dans un CSV pour vérification
 """df.to_csv("df.csv",sep='|', index=False)
 """
 #---------------------------------------------------
@@ -226,9 +227,6 @@ df["salaire_moyen"] = np.trunc((df["salaire_min"] + df["salaire_max"]) / 2)
 #exclusion des salaires moyens supérieurs à 150K€ à l'année : dus à des erreurs de saisie.
 df["salaire_moyen"] = df["salaire_moyen"].apply(lambda x : 0 if x > 150000 else x)
 
-
-
-
 #Rajout de la division du code 
 #-- on récupère la base de données NAF du réseau
 df_naf = pd.read_csv("NAF.csv", header=0 , sep=';')
@@ -260,12 +258,11 @@ df_dash = df[[  "codeNAF_division_libelle",   	"entreprise_nom",			"lieuTravail_
 df_dash= df_dash[sorted(df_dash.columns)]  
 
 
-#extraction en CSV
+#extraction en CSV et Json pour vérification / travail en local
 """df.to_csv("df2.csv",sep='|', index=False)
 #extraction en json
 with open("DfPE.json", "w") as fichier:
     json.dump(df_dash.to_dict(orient='records'), fichier, indent=4)"""
-
 
 print(f"\nTransformation - nombre d'enregistrements : {len(df)}")
 print(f"Temps d'exécution {round((time.time()-debut)/60 ,2)} minutes")

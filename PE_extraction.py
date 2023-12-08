@@ -14,19 +14,9 @@ debut = time.time()
 # Appel de l'API de génération du Token
 #############################################################
 
-#récupération de la clé github ?
+#récupération de la clé github 
 API_KEY = os.environ.get('api_key')
 API_ID_CLIENT = os.environ.get('api_id_client')
-
-#à supprimer : clé en dur pour test local
-API_c1 = "PAR_dat"
-API_c2 = "ascientest_7cc80d476c"
-API_c3 = "bbaaa1b635864f02d8825a4e46eee4d87e45bc7e6642770741fa6f"
-API_ID_CLIENT = API_c1+API_c2+API_c3
-API_k1 = "e888aeb08dd9e4a022"
-API_k2 = "d7895b851f305c6d343692"
-API_k3 = "b0b52ef8135f1418a3661bc0"
-API_KEY = API_k1+API_k2+API_k3
 
 print("***********", API_KEY, "*****************")
 print("***********", API_ID_CLIENT, "*****************")

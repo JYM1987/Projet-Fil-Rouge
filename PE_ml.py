@@ -130,7 +130,6 @@ print('Max Error:', np.trunc(metrics.max_error(y_test, y_pred_test)))
 print('Mean Squared Log Error:', round(metrics.mean_squared_log_error(y_test, y_pred_test)),3)
 print('Median Absolute Error:', np.trunc(metrics.median_absolute_error(y_test, y_pred_test)))
 
-
 ############################################################################################################################
 #alimentation du DF Pôle emploi avec les données simulées dans une nouvelle colonne : concaténation des simuls train et test
 ############################################################################################################################
