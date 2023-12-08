@@ -149,7 +149,7 @@ for departement in [f"{i:02d}" for i in range(1,96)]:
     maj_param_appel("departement", departement)
 
     #(ré)initialisation du token d'accès tous les 10 départements afin de ne pas se faire jeter par l'API.
-    if departement in [f"{i:02d}" for i in range(1,96,3)]:
+    if departement in [f"{i:02d}" for i in range(1,96,1)]:
         rep_token = appel_API_token()
         access_token = gestion_rc_token(rep_token, data_token)
 
