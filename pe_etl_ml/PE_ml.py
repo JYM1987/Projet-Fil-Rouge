@@ -146,7 +146,7 @@ X_cat = features_all[["romeCode"]]
 X_num = features_all.drop(["romeCode"], axis =1)
 
 #encodage des variables catégorielles
-ohe = OneHotEncoder(drop="first", sparse_output=False)
+ohe = OneHotEncoder(drop="first", sparse=False)
 
 #X_cat_encoded  = ohe.fit_transform(X_cat)
 X_cat_encoded = ohe.fit_transform(X_cat)
