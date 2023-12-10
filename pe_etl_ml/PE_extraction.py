@@ -145,11 +145,11 @@ def gestion_rc_offres(reponse, seq_appel, params):
 #afin de récolte un panel de job le plus large possible et l'agréger dans la liste datePE :
 dataPE = []
 #récupération des annonces pour chacun des départements français de métropole
-for departement in [f"{i:02d}" for i in range(1,96)]:
+for departement in [f"{i:02d}" for i in range(1,10)]:
     maj_param_appel("departement", departement)
 
     #(ré)initialisation du token d'accès tous les 10 départements afin de ne pas se faire jeter par l'API.
-    if departement in [f"{i:02d}" for i in range(1,96,1)]:
+    if departement in [f"{i:02d}" for i in range(1,10,1)]:
         rep_token = appel_API_token()
         access_token = gestion_rc_token(rep_token, data_token)
 
