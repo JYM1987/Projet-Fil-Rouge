@@ -64,7 +64,7 @@ X_test_cat = X_test[["romeCode"]]
 X_test_num = X_test.drop(["romeCode"], axis =1)
 
 #encodage des variables catégorielles
-ohe = OneHotEncoder(drop="first", sparse_output=False)
+ohe = OneHotEncoder(drop="first", sparse=False)
 X_train_cat = ohe.fit_transform(X_train_cat)
 X_test_cat  = ohe.transform(X_test_cat)
 
