@@ -7,25 +7,33 @@ services:
       - network
     volumes:
       - ./data/db:/data/db
+    expose:
+      - "27017"
     ports:
-    - 27017:27017
+      - 27017:27017
 
   pe_etl_ml:
     image: pe_etl_ml:latest
     container_name: pe_etl_ml
+    environment:
+      - api_key=${API_PE_KEY}
+      - api_id_client=${API_PE_CLIENT}
+      - LANG=C.UTF-8
+    volumes:
+      - ./data/json:/home/data/json
     depends_on:
       - mongodb
     networks:
       - network
-    volumes:
-      - .:/home
 
   jobdash:
     image: jobdash:latest
     container_name: jobdash
     restart: always
+    volumes:
+      - ./data/json:/home/data/json
     ports:
-      - 5000:80
+      - 5000:5000
     networks:
       - network
     
