@@ -29,6 +29,8 @@ services:
   jobdash:
     image: jobdash:latest
     container_name: jobdash
+    environment:
+      - LANG=C.UTF-8
     restart: always
     volumes:
       - ./data/json:/home/data/json
