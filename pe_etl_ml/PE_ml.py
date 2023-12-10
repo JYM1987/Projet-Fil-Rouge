@@ -64,7 +64,7 @@ X_test_cat = X_test[["romeCode"]]
 X_test_num = X_test.drop(["romeCode"], axis =1)
 
 #encodage des variables catégorielles
-ohe = OneHotEncoder(drop="first", sparse_output=False)
+ohe = OneHotEncoder(drop="first", sparse=False)
 X_train_cat = ohe.fit_transform(X_train_cat)
 X_test_cat  = ohe.transform(X_test_cat)
 
@@ -84,7 +84,7 @@ X_test_robust = robustscaler.transform(X_test_scaler)
 
 
 # arbre aléatoire regression => !!!! Meilleur ML !!!!
-model1 = RandomForestRegressor(max_depth = 70, n_estimators=100, max_features=25, random_state=42, criterion='squared_error', min_samples_split=2, min_samples_leaf=1)
+model1 = RandomForestRegressor(max_depth = 70, n_estimators=100, max_features=25, random_state=42, min_samples_split=2, min_samples_leaf=1)
 #DecisionTreeRegressor  - score train : 0.915
 #DecisionTreeRegressor - score test : 0.612
 """
@@ -146,7 +146,7 @@ X_cat = features_all[["romeCode"]]
 X_num = features_all.drop(["romeCode"], axis =1)
 
 #encodage des variables catégorielles
-ohe = OneHotEncoder(drop="first", sparse_output=False)
+ohe = OneHotEncoder(drop="first", sparse=False)
 
 #X_cat_encoded  = ohe.fit_transform(X_cat)
 X_cat_encoded = ohe.fit_transform(X_cat)

@@ -14,7 +14,7 @@ debut = time.time()
 #---------------------------------------------------
 
 # Connexion à MongoDB
-client = MongoClient(host="127.0.0.1", port = 27017)
+client = MongoClient(host="mongodb", port = 27017)
 
 #création de la DB
 DB = client["DB_job"]
