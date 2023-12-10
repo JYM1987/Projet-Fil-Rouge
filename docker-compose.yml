@@ -3,7 +3,32 @@ services:
   mongodb:
     image : mongo:5.0
     container_name: my_mongo
+    networks:
+      - network
     volumes:
-    - ./sample_training:/data/db
+      - ./data/db:/data/db
     ports:
     - 27017:27017
+
+  pe_etl_ml:
+    image: pe_etl_ml:latest
+    container_name: pe_etl_ml
+    depends_on:
+      - mongodb
+    networks:
+      - network
+    volumes:
+      - .:/home
+
+  jobdash:
+    image: jobdash:latest
+    container_name: jobdash
+    restart: always
+    ports:
+      - 5000:80
+    networks:
+      - network
+    
+networks:
+ network:
+     driver: bridge
