@@ -1,5 +1,4 @@
-Le projet fil-rouge a pour but de mettre en pratique les différences compétences et outils que nous avons pu découvrir au cours de notre formation chez Datascientest (formation sur 3 mois - 38h/semaines 
-- Certifiée RNCP36129 (Niveau 7))
+Le projet fil-rouge a pour but de mettre en pratique les différences compétences et outils que nous avons pu découvrir au cours de notre formation chez Datascientest (formation sur 3 mois - 38h/semaines - Certifiée RNCP36129 (Niveau 7))
 
 Ainsi, notre mission était d'extraire et traiter l'ensemble des offres d'emploi disponibles en France métropolitaine afin de pouvoir les exploiter au travers de DashBoard et de machine learning.
 Nous avons donc mis en place l'architecture suivante :
