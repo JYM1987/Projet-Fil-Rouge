@@ -4,17 +4,17 @@ Ainsi, notre mission était d'extraire et traiter l'ensemble des offres d'emploi
 Nous avons donc mis en place l'architecture suivante :
 - une partie ETL (Extraction, Transform, Load) :
     - Via des scripts PYTHON, nous avons récupéré toutes les données possibles de l'API de Pôle Emploi.
-    - Elles ont ensuite été traitées (suppression des doublons, remplacement des Nan et valeurs manquantes, extraction de données de libellés...)...
+    - Elles ont ensuite été traitées (suppression des doublons, remplacement des Nan et valeurs manquantes, extraction de données de libellés...)
     - Pour être enrichi via du MACHINE LEARNING avec une simulation du salaire moyen de chacune de ces offres en fonction des 8 critères distincts (Code ROME, localisation, nombre d'année d'expérience...)
     ==> Ces données ont finalement été chargées dans des tables NOSQL du type MONGODB
-- une partie DATAVIZ
-    -  une partie de ces données ont été utilisées pour alimenter un Dashboard DASH contenant divers graphs :
-		- la localisation de chaques offres sur une carte de france ainsi qu'avec un code couleur en fonction de son salaire
-    	- un classement des secteurs d'activité ont fonction des salaires proposés
-    	- un classement des secteurs d'activité ont fonction de l'expérience demandée
-    	- un récapitulatif des offres affichées en fonction des filtres choisis
-- une partie contenairisation :
-   - La partie ETL et la partie DATAVIZ ont tout deux été contenairisées via DOCKER.
+- Une partie DATAVIZ :
+    -  Une fraction de ces données a été utilisée pour alimenter un Dashboard DASH contenant divers graphs :
+	- La localisation de chaque offre sur une carte de France ainsi qu'avec un code couleur en fonction de son salaire
+    	- Un classement des secteurs d'activité en fonction des salaires proposés
+    	- Un classement des secteurs d'activité en fonction de l'expérience demandée
+    	- Un récapitulatif des offres affichées en fonction des filtres choisis
+- Une partie containerisation :
+   - Les parties ETL et DATAVIZ ont toutes deux été containerisées via DOCKER.
 
 Support de Présentation : [JobMarket.pptx](https://github.com/JYM1987/projet_fil_rouge/files/13677202/JobMarket.pptx)
 
