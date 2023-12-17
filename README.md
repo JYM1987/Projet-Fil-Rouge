@@ -13,8 +13,8 @@ Nous avons donc mis en place l'architecture suivante :
     	- Un classement des secteurs d'activité en fonction des salaires proposés
     	- Un classement des secteurs d'activité en fonction de l'expérience demandée
     	- Un récapitulatif des offres affichées en fonction des filtres choisis
-- Une partie containerisation :
-   - Les parties ETL et DATAVIZ ont toutes deux été containerisées via DOCKER.
+- Une partie conteneurisées :
+   - Les parties ETL et DATAVIZ ont toutes deux été conteneurisées via DOCKER.
 
 Support de Présentation : [JobMarket.pptx](https://github.com/JYM1987/projet_fil_rouge/files/13677202/JobMarket.pptx)
 
